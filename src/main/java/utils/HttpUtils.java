@@ -19,17 +19,10 @@ public class HttpUtils
 
     private static Gson gson = new Gson();
 
-    public static CombinedDTO fetchDataParallel() throws IOException, MalformedURLException, ExecutionException, InterruptedException
+ public static CombinedDTO fetchDataParallel() throws IOException, MalformedURLException, ExecutionException, InterruptedException
     {
 
         ExecutorService es = Executors.newCachedThreadPool();
-        Future<ChuckDTO> chuckDTOFuture = es.submit(
-                () -> gson.fromJson(HttpUtils.fetchData("https://api.chucknorris.io/jokes/random"), ChuckDTO.class)
-        );
-
-        Future<DadDTO> dadDTOFuture = es.submit(
-                () -> gson.fromJson(HttpUtils.fetchData("https://icanhazdadjoke.com"), DadDTO.class)
-        );
 
         Future<Covid19DTO[]> c19DTOFuture = es.submit(
                 () -> gson.fromJson(HttpUtils.fetchData("https://covid-19-data.p.rapidapi.com/country/code?code=dk"), Covid19DTO[].class)
@@ -41,11 +34,9 @@ public class HttpUtils
         );
 
 
-        ChuckDTO chuckDTO = chuckDTOFuture.get();
-        DadDTO dadDTO = dadDTOFuture.get();
         List<Covid19DTO> covid19DTO = Arrays.asList(c19DTOFuture.get());
         List<RandomRecipesDTO> randomRecipesDTO = Arrays.asList(rRDTOFuture.get());
-        CombinedDTO combinedDTO = new CombinedDTO(chuckDTO, dadDTO, covid19DTO, randomRecipesDTO);
+        CombinedDTO combinedDTO = new CombinedDTO(covid19DTO,randomRecipesDTO);
 
         return combinedDTO;
     }
@@ -78,7 +69,7 @@ public class HttpUtils
             System.out.println("covid " + dto.getCountry());
         }
 
-        return new CombinedDTO(chuckDTO, dadDTO, covid19DTOList, recipesDTOList);
+        return new CombinedDTO(covid19DTOList, recipesDTOList);
     }
 
 
